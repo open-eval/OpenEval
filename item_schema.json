@@ -1,0 +1,78 @@
+{
+    "item_id": "[str, auto] UNIQUE IDENTIFIER FOR THE ITEM",
+    "item_metadata": {
+        "ingestion_time": "[str, auto] TIMESTAMP OF WHEN THE ITEM WAS INGESTED (ISO 8601 FORMAT)",
+        "contributor": {
+            "name": "[str, optional] NAME OF THE CONTRIBUTOR",
+            "email": "[str, optional] EMAIL ADDRESS OF THE CONTRIBUTOR",
+            "affiliation": "[str, optional] AFFILIATION OF THE CONTRIBUTOR"
+        },
+        "source": {
+            "benchmark_name": "[str] NAME OF THE BENCHMARK OR DATASET",
+            "benchmark_version": "[str] VERSION OF THE BENCHMARK OR DATASET",
+            "benchmark_url": "[str, optional] URL TO THE BENCHMARK OR DATASET",
+            "benchmark_tags": "[list[str], optional] TAGS OR KEYWORDS ASSOCIATED WITH THE BENCHMARK OR DATASET"
+        }
+    },
+    "item_content": [
+        "[str or dict] CONTENT OF THE ITEM, SUCH AS A QUESTION, A DIALOGUE, OR MULTIPLE CHOICE OPTIONS"
+    ],
+    "responses": [
+        {
+            "response_id": "[str, auto] UNIQUE IDENTIFIER FOR THE RESPONSE",
+            "model": {
+                "name": "[str] NAME OF THE RESPONDENT MODEL",
+                "size": "[str or int, optional] SIZE OF THE RESPONDENT MODEL",
+                "model_adaptation": {
+                    "system_instruction": "[str] SYSTEM INSTRUCTION OR PROMPT USED TO ADAPT THE ITEM FOR THIS RESPONSE",
+                    "generation_parameters": {
+                        "temperature": "[float] TEMPERATURE USED FOR GENERATION",
+                        "do_sample": "[bool] WHETHER OR NOT TO USE SAMPLING, FALSE MEANS GREEDY DECODING",
+                        "num_beams": "[int] NUMBER OF BEAMS FOR BEAM SEARCH, 1 MEANS NO BEAM SEARCH",
+                        "top_k": "[int] TOP-K VALUE USED FOR GENERATION",
+                        "top_p": "[float] TOP-P VALUE USED FOR GENERATION",
+                        "max_tokens": "[int] MAXIMUM NUMBER OF TOKENS GENERATED"
+                    },
+                    "tools": [
+                        {
+                            "type":"[str] TYPE OF THE TOOL, SUCH AS A SEARCH ENGINE",
+                            "content": "[any] TOOL AVAILABLE TO THE MODEL"
+                        }
+                    ]
+                }
+            },
+            "item_adaptation": {
+                "input_content": [
+                    "[str or dict] ACTUAL INPUT PROVIDED TO THE MODEL FOR THIS RESPONSE, SUCH AS THE ADAPTED QUESTION OR DIALOGUE"
+                ],
+                "demonstrations": "[list[str], optional] DEMONSTRATIONS OR EXAMPLES PROVIDED TO THE MODEL FOR THIS RESPONSE",
+                "external_resources": [
+                    {
+                        "type":"[str] TYPE OF THE EXTERNAL RESOURCE",
+                        "content": "[any] AVAILABLE EXTERNAL RESOURCES FROM THE TEST ENVIRONMENT"
+                    }
+                ]
+            },
+            "response_content": [
+                "[str or dict] CONTENT OF THE RESPONSE, SUCH AS THE MODEL'S ANSWER OR OUTPUT"
+            ],
+            "scores": [
+                {
+                    "metric": {
+                        "name": "[str] NAME OF THE EVALUATION METRIC",
+                        "references": "[list[any]] REFERENCES FOR THE EVALUATION METRIC",
+                        "models": "[list[str]] MODELS OR ALGORITHMS USED TO COMPUTE THE EVALUATION METRIC",
+                        "extra_artifacts": [
+                            {
+                                "type": "[str] TYPE OF THE ARTIFACT",
+                                "content": "[any] ADDITIONAL ARTIFACT FOR SCORING THE RESPONSE"
+                            }
+                        ]
+                    },
+                    "value": "[int or float] NUMERIC VALUE OF THE EVALUATION METRIC"
+                }
+            ]
+        }
+    ],
+    "schema_version": "[str, auto] OPENEVAL SCHEMA VERSION"
+}
