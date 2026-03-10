@@ -106,8 +106,15 @@ def _validate(
 
             val = data[sch_key]
 
-            if val is None:
-                violations.append({"field": field_path, "field_desc": sch_value, "violation_type": ValueError})
+            if presence == 'non-empty':
+                if val is None:
+                    violations.append({"field": field_path, "field_desc": sch_value, "violation_type": ValueError})
+                    continue
+                elif isinstance(val, (str, list)) and len(val) == 0:
+                    violations.append({"field": field_path, "field_desc": sch_value, "violation_type": ValueError})
+                    continue
+
+            if presence == 'required' and val is None:
                 continue
 
             if not _type_ok(val, dtype):
@@ -200,21 +207,22 @@ def validate_entry(entry: dict) -> tuple[bool, list[dict]]:
 
 
 if __name__ == '__main__':
-    file_path = r'C:\Users\59518\Desktop\Study\Research\26 HCEval\OpenEval\item_examples.json'
-    if '.jsonl' in file_path:   # jsonl
+    # load your item examples
+    file_path = 'item_examples.json'
+    if file_path.endswith('.jsonl'):   # jsonl
         with jsonlines.open(file_path, 'r') as f:
             examples = [o for o in f]
     else:   # json
         assert file_path.endswith('.json')
         with open(file_path, 'r') as f:
             examples = json.load(f)
+
+    # validate the examples and print violations
     for i, e in enumerate(examples):
         res, vios = validate_entry(e)
         if not res:
             print(f'Item #{i}')
             for j, v in enumerate(vios):
-                # if 'responses' in v['field']:
-                    # print(f'Item #{i}')
                 print(f'{j + 1}. {v}')
             print()
     print('Done!')

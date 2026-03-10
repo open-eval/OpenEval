@@ -1,11 +1,13 @@
 import os
+import re
 import json
 import copy
+import time
 from datetime import datetime, timezone
 from tqdm import tqdm, trange
 import jsonlines
 
-OUT_DIR = 'test_out'
+OUT_DIR = '/home/hjiang66/scratchzxiao25/hjiang66/OpenEval'
 SCHEMA_VERSION = 'v0.1.0'
 
 
@@ -26,12 +28,14 @@ def helm_to_benchmarks(root):
     Args:
         root: root directory of the result folders.
     '''
+    # check existence
     out_path = os.path.join(OUT_DIR, 'helm_benchs.jsonl')
     if os.path.exists(out_path):
         with jsonlines.open(out_path, 'r') as f:
             collected_benchs = [b['benchmark_name'] for b in f]
     else:
         collected_benchs = []
+    collected_cnt = len(collected_benchs)
     of = jsonlines.open(out_path, 'a')
 
     for folder in tqdm(os.listdir(root), desc=root):
@@ -52,7 +56,7 @@ def helm_to_benchmarks(root):
         of.write(source)
         
     of.close()
-    print(f'Converted {len(collected_benchs)} benchmarks from {root} to {out_path}.')
+    print(f'Converted {len(collected_benchs) - collected_cnt} benchmarks from {root} to {out_path}.')
 
 
 def helm_to_items(root, folder, name='Anonymous', email='', affiliation=''):
@@ -79,9 +83,16 @@ def helm_to_items(root, folder, name='Anonymous', email='', affiliation=''):
     contributor = {'name': name, 'email': email, 'affiliation': affiliation}
     source = scen['name']
 
-    out_path = os.path.join(OUT_DIR, f'helm_items_{folder}.jsonl')
-    of = jsonlines.open(out_path, 'w')
+    # check existence
+    out_path = os.path.join(OUT_DIR, f'helm_items_{source}.jsonl')
+    if os.path.exists(out_path):
+        with jsonlines.open(out_path, 'r') as f:
+            collected_items = [o for o in f]
+    else:
+        collected_items = []
+    of = jsonlines.open(out_path, 'a')
     mapping = {}
+    new_cnt = 0
 
     # unique fields, 1 req => 1 response/trial
     for idx in trange(len(reqs), desc=folder):
@@ -90,14 +101,22 @@ def helm_to_items(root, folder, name='Anonymous', email='', affiliation=''):
         ## item id
         if req['instance']['id'] in mapping or 'perturbation' in req['instance']:
             continue    # multiple trials for a single item may exist
-        item_id = generate_item_id(source, ingestion_time, len(mapping))
+        exist = False
+        for item in collected_items:
+            if req['instance']['input']['text'] == item['item_content']['input'][0]:
+                mapping[req['instance']['id']] = item['item_id']
+                exist = True
+                break
+        if exist:
+            continue
+        item_id = generate_item_id(source, ingestion_time, new_cnt)
 
         ## item content
         item_content = {
             'input': [
                 req['instance']['input']['text']
-            ],
-            'references': req['instance']['references']
+            ],  # TODO: manual check before every run
+            'references': req['instance']['references'] # TODO: manual check before every run
         }
 
         ## assemble item
@@ -112,10 +131,11 @@ def helm_to_items(root, folder, name='Anonymous', email='', affiliation=''):
             'schema_version': SCHEMA_VERSION
         }
         of.write(item)
+        new_cnt += 1
         mapping[req['instance']['id']] = item_id
 
     of.close()
-    print(f'Converted {len(mapping)} items from {folder} to {OUT_DIR}.')
+    print(f'Converted {new_cnt} items from {folder} to {OUT_DIR}.')
 
     return mapping
 
@@ -138,13 +158,15 @@ def helm_to_responses(root, folder, id_map):
         stats = json.load(f)
 
     # model (shared fields)
-    model_base = {'name': '', 'size': None, 'model_adaptation': {}} 
+    model_base = {'name': '', 'size': '', 'model_adaptation': {}} 
     model_base['name'] = adapter['model'].split('/')[-1]
-    model_base['size'] = None   # TODO: manual check before every run
+    try_size = re.search('[0-9.]+b', model_base['name'].lower())
+    if try_size:
+        model_base['size'] = try_size.group(0)
     model_base['model_adaptation']['system_instruction'] = adapter.get('instructions', '')
     model_base['model_adaptation']['generation_parameters'] = {
         "temperature": adapter['temperature'],
-        "do_sample": False, # TODO: manual check before every run
+        "do_sample": adapter['temperature'] != 0,
         "top_k": None,
         "top_p": None,
         "max_tokens": adapter['max_tokens']
@@ -153,10 +175,13 @@ def helm_to_responses(root, folder, id_map):
 
     # metrics (shared)
     metric_names = [
-        "exact_match",
-        "quasi_exact_match",
-        "prefix_exact_match",
-        "quasi_prefix_exact_match"
+        "rouge_1",
+        "rouge_2",
+        "rouge_l",
+        "summac",
+        "BERTScore-P",
+        "BERTScore-R",
+        "BERTScore-F"
     ]   # TODO: manual check before every run
 
     res_cnt = {iid: 0 for iid in id_map}
@@ -178,9 +203,15 @@ def helm_to_responses(root, folder, id_map):
         model['model_adaptation']['generation_parameters']['top_p'] = req['request']['top_p']
 
         ## item adaptation
+        ### demo extraction
         prompt = req['request']['prompt']
         separator = adapter['input_prefix']
-        demonstrations = [demo.strip() for demo in prompt.split(req['instance']['input']['text'])[0].split(separator) if len(demo.strip()) > 1]
+        instruction = adapter['instructions']
+        if len(prompt) > len(req['instance']['input']['text']) and separator:
+            demo_str = prompt.split(req['instance']['input']['text'])[0].replace(instruction, '')
+            demonstrations = [demo.strip() for demo in demo_str.split(separator) if len(demo.strip()) > 1]
+        else:
+            demonstrations = []
         item_adaptation = {
             'request_input': [prompt],  # TODO: manual check before every run
             'demonstrations': demonstrations,  # TODO: manual check before every run
@@ -203,15 +234,33 @@ def helm_to_responses(root, folder, id_map):
             for rs in req_stat['stats']:
                 if rs['name']['name'] in metric_names:
                     assert rs['count'] == 1
-                    scores.append({
-                        'metric': {
-                            'name': rs['name']['name'],
-                            'models': [],           # TODO: manual check before every run
-                            'extra_artifacts': []   # TODO: manual check before every run
-                        },
-                        'value': rs['mean']
-                    })
-
+                    if rs['name']['name'] == 'summac':
+                        scores.append({
+                            'metric': {
+                                'name': rs['name']['name'],
+                                'models': ["vitc"],           # TODO: manual check before every run
+                                'extra_artifacts': []   # TODO: manual check before every run
+                            },
+                            'value': rs['mean']
+                        })
+                    elif 'BERT' in rs['name']['name']:
+                        scores.append({
+                            'metric': {
+                                'name': rs['name']['name'],
+                                'models': ["microsoft/deberta-large-mnli"],           # TODO: manual check before every run
+                                'extra_artifacts': []   # TODO: manual check before every run
+                            },
+                            'value': rs['mean']
+                        })
+                    else:
+                        scores.append({
+                            'metric': {
+                                'name': rs['name']['name'],
+                                'models': [],           # TODO: manual check before every run
+                                'extra_artifacts': []   # TODO: manual check before every run
+                            },
+                            'value': rs['mean']
+                        })
         ## assemble response
         response = {
             'response_id': response_id,
@@ -227,10 +276,17 @@ def helm_to_responses(root, folder, id_map):
 
 
 if __name__ == '__main__':
-    root_dir = 'test_data'
-    run_dir = 'imdb,model=meta_llama-30b,data_augmentation=canonical'
+    root_dir = '/home/hjiang66/scratchzxiao25/hjiang66/helm_output/runs/classic-supplement'
+    # run_dir = 'imdb,model=meta_llama-30b,data_augmentation=canonical'
+
+    for run_dir in tqdm(os.listdir(root_dir), desc='Converting'):
+        if 'xsum' not in run_dir:
+            continue
+        mapping = helm_to_items(root_dir, run_dir, 'Han', 'hjiang66@jh.edu', 'JHU')
+        helm_to_responses(root_dir, run_dir, mapping)
+        time.sleep(1)
 
     # mapping = helm_to_items(root_dir, run_dir)
     # helm_to_responses(root_dir, run_dir, mapping)
 
-    helm_to_benchmarks(root_dir)
+    # helm_to_benchmarks(root_dir)

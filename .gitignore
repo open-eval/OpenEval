@@ -2,3 +2,5 @@ website
 collect_results.py
 test_data
 test_out
+internal_*
+slurm

@@ -10,7 +10,8 @@
         "source": {
             "benchmark_name": "[str | non-empty] NAME OF THE BENCHMARK OR DATASET",
             "benchmark_version": "[str | required] VERSION OF THE BENCHMARK OR DATASET",
-            "benchmark_url": "[str | optional] URL TO THE BENCHMARK OR DATASET",
+            "paper_url": "[str | optional] URL TO THE BENCHMARK PAPER",
+            "dataset_url": "[str | optional] URL TO THE BENCHMARK DATASET",
             "benchmark_tags": "[list[str] | optional] TAGS OR KEYWORDS ASSOCIATED WITH THE BENCHMARK OR DATASET"
         }
     },
