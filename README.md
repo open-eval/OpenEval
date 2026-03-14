@@ -16,7 +16,7 @@ Our **position paper** is available in this repository: [Position: Science of AI
 
 Thank you for your interest in OpenEval!
 
-1. **Browse the schema** — refer to [`item_schema.json`](item_schema.json) for the full structure, field requirements, and field descriptions. A comprehensive [Schema Reference](#schema-reference) of the OpenEval schema of the current version (v0.1.0) is provided below.
+1. **Browse the schema** — refer to [`item_schema.json`](item_schema.json) for the full structure, field requirements, and field descriptions. A comprehensive [Schema Reference](#-schema-reference-v010) of the OpenEval schema of the current version (v0.1.0) is provided below.
 2. **See our examples** — two example items are provided in [`item_examples.json`](item_examples.json). We are curating more items from different types of AI evaluations.
 3. **Access full data** — all data will be shared in our [Huggingface Dataset](https://huggingface.co/datasets/human-centered-eval/OpenEval). We are still formatting the data, so please stay tuned and we appreciate your patience😊.
 
