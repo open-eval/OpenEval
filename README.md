@@ -135,6 +135,8 @@ Each score object pairs an evaluation metric with its computed value.
 | `scores[].metric.extra_artifacts` | `list[object]` | — | Additional artifacts used for scoring (e.g., rubrics). Each entry has `type` (str, required) and `content` (any, required). |
 | `scores[].value` | `int\|float\|bool` | non-empty | Numeric or boolean value of the metric score for this response. |
 
+---
+
 ### Notes on HF Storage Adaptation
 
 When data is pushed to the Hugging Face dataset, the schema undergoes three adaptations:
@@ -162,7 +164,6 @@ When data is pushed to the Hugging Face dataset, the schema undergoes three adap
 
 **3. Float conversion.** `scores[].value` is cast to `float64` regardless of its original type (`int`, `float`, or `bool`) to satisfy the Parquet column schema.
 
----
 
 ## 🎉 Acknowledgements
 
