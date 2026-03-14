@@ -4,3 +4,4 @@ test_data
 test_out
 internal_*
 slurm
+current_data.xlsx
