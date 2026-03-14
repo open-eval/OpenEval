@@ -3,7 +3,7 @@
 An open-source, **item-centered evaluation repository** toward **the open science of AI evaluation**.
 This GitHub repository is an official resource center for OpenEval, maintained by the [Human-Centered Eval](https://huggingface.co/human-centered-eval) project.
 
-> [🌐 OpenEval Homepage](https://open-eval.github.io/)  |  [🤗 Huggingface Dataset](https://huggingface.co/datasets/human-centered-eval/OpenEval)
+> [🌐 OpenEval Homepage](https://open-eval.github.io/)  |  [🤗 Hugging Face Dataset](https://huggingface.co/datasets/human-centered-eval/OpenEval)
 
 ## ❓ Why Item-Level Benchmark Data Matters for AI Evaluation Science
 
@@ -18,7 +18,7 @@ Thank you for your interest in OpenEval!
 
 1. **Browse the schema** — refer to [`item_schema.json`](item_schema.json) for the full structure, field requirements, and field descriptions. A comprehensive [Schema Reference](#-schema-reference-v010) of the OpenEval schema of the current version (v0.1.0) is provided below.
 2. **See our examples** — two example items are provided in [`item_examples.json`](item_examples.json). We are curating more items from different types of AI evaluations.
-3. **Access full data** — all data will be shared in our [Huggingface Dataset](https://huggingface.co/datasets/human-centered-eval/OpenEval). We are still formatting the data, so please stay tuned and we appreciate your patience😊.
+3. **Access full data** — all data will be shared in our [Hugging Face Dataset](https://huggingface.co/datasets/human-centered-eval/OpenEval). We are still formatting the data, so please stay tuned and we appreciate your patience😊.
 
 
 ## ⛽ Interested in Contributing to OpenEval?
@@ -30,8 +30,8 @@ Thank you for considering contributing your data to OpenEval!
    - Whether the entry passes validation
    - Which fields/keys need correction (if any)
    - The types of violations found
-3. **Submit** a pull request to this repository with your `.json` or `.jsonl` files. We will notify you throughout the review process.
-4. **Integration** — once your submission passes review, we will integrate your data into the OpenEval Huggingface dataset and send you a confirmation regarding your contribution.
+3. **Submit** your JSON or JSONL files via a pull request to our [Hugging Face dataset](https://huggingface.co/datasets/human-centered-eval/OpenEval). On the dataset page, go to `Files and versions` → `+ Contribute` → `New pull request` → `On your machine`, name your PR branch, then click `Create PR branch` and push your submissions to that branch. We will notify you throughout the review process.
+4. **Integration** — once your submission passes review, we will integrate your data into the OpenEval Hugging Face dataset and send you a confirmation regarding your contribution.
 
 > If you need any further guidance or assistance, please don't hesitate to [open an issue](../../issues) or [email us](mailto:hjiang66@jh.edu,ziang.xiao@jhu.edu). We are more than happy to help.
 
