@@ -9,7 +9,19 @@ This GitHub repository is an official resource center for OpenEval, maintained b
 
 AI evaluation suffers from opacity and inconsistency, with results scattered across benchmarks and repositories in incompatible formats. To address this, we propose **OpenEval** — a large-scale, item-centered repository where every evaluation instance is captured in a self-contained schema while remaining connected to the broader experimental context.
 
-Our **position paper** is available in this repository: [Position: Science of AI Evaluation Requires Item-level Benchmark Data](position_paper.pdf). Feel free to take a look!
+Our **position paper** is available in this repository: [Position: Science of AI Evaluation Requires Item-level Benchmark Data](position_paper.pdf). Feel free to take a look! If you find OpenEval useful, please cite us via:
+
+```
+@misc{jiang2026positionscienceaievaluation,
+      title={Position: Science of AI Evaluation Requires Item-level Benchmark Data}, 
+      author={Han Jiang and Susu Zhang and Xiaoyuan Yi and Xing Xie and Ziang Xiao},
+      year={2026},
+      eprint={2604.03244},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2604.03244}, 
+}
+```
 
 
 ## 🔍 Want to Explore OpenEval?
